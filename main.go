@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Cell struct {
 	isAlived bool
@@ -37,8 +40,8 @@ func (c Canvas) GetNeibgor(x uint16, y uint16) int {
 			if dx == 0 && dy == 0 {
 				continue
 			}
-			pos_x := uint16(int(x)+dx) % c.size_x
-			pos_y := uint16(int(y)+dy) % c.size_y
+			pos_x := uint16(int(c.size_x+x)+dx) % c.size_x
+			pos_y := uint16(int(c.size_y+y)+dy) % c.size_y
 			if c.isAlived(pos_x, pos_y) {
 				neigbor += 1
 			}
@@ -64,7 +67,7 @@ func printBool(value bool) int {
 func (c Canvas) printCells() {
 	for row := 0; row < int(c.size_x); row++ {
 		for column := 0; column < int(c.size_y); column++ {
-			fmt.Print(printBool(c.cells[row][column].isAlived), " ")
+			fmt.Printf("%d ", printBool(c.cells[row][column].isAlived))
 		}
 		fmt.Print("\n")
 	}
@@ -78,29 +81,24 @@ func (c Canvas) PutLivedCell(x uint16, y uint16) {
 }
 
 func (c Canvas) Update() {
-	tmp := make([][]Cell, len(c.cells))
-	for i := range len(c.cells) {
-		row := make([]Cell, len(c.cells[i]))
-		tmp[i] = row
-	}
+	tmp := NewCanvas(c.size_x, c.size_y)
 	for x, row := range c.cells {
 		for y := range row {
 			is_alliving := c.cells[x][y].isAlived
 			neigh_count := c.GetNeibgor(uint16(x), uint16(y))
 			if neigh_count == 2 && is_alliving || neigh_count == 3 {
-				tmp[x][y].isAlived = true
+				tmp.cells[x][y].isAlived = true
 			} else {
-				tmp[x][y].isAlived = false
+				tmp.cells[x][y].isAlived = false
 			}
 
 		}
 	}
-	copy(c.cells, tmp)
+	copy(c.cells, tmp.cells)
 	// c.cells = tmp
 }
 
 func main() {
-	fmt.Println("Hello")
 	canv := NewCanvas(10, 10)
 
 	canv.PutLivedCell(1, 2)
@@ -108,8 +106,12 @@ func main() {
 	canv.PutLivedCell(3, 3)
 	canv.PutLivedCell(3, 2)
 	canv.PutLivedCell(3, 1)
-	canv.printCells()
-	canv.Update()
-	fmt.Println()
-	canv.printCells()
+	for i := 0; i < 70; i++ {
+		fmt.Print("\033[0;0H") // move cursor up one line
+		canv.printCells()
+		canv.Update()
+		time.Sleep(500 * time.Millisecond)
+
+	}
+
 }
