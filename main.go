@@ -79,7 +79,10 @@ func (c Canvas) PutLivedCell(x uint16, y uint16) {
 
 func (c Canvas) Update() {
 	tmp := make([][]Cell, len(c.cells))
-	copy(tmp, c.cells)
+	for i := range len(c.cells) {
+		row := make([]Cell, len(c.cells[i]))
+		tmp[i] = row
+	}
 	for x, row := range c.cells {
 		for y := range row {
 			is_alliving := c.cells[x][y].isAlived
@@ -92,6 +95,7 @@ func (c Canvas) Update() {
 
 		}
 	}
+	copy(c.cells, tmp)
 	// c.cells = tmp
 }
 
@@ -107,8 +111,5 @@ func main() {
 	canv.printCells()
 	canv.Update()
 	fmt.Println()
-	canv.Update()
-	fmt.Println()
-	canv.Update()
 	canv.printCells()
 }
